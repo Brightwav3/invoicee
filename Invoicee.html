@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoicee — Fakturace přímo z plochy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 17px;
+  color: var(--ink);
+  background: var(--canvas);
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+  overflow-x: hidden;
+}
+:root {
+  --primary: #1A7F4B;
+  --primary-hover: #167A44;
+  --primary-on-dark: #3DDC6E;
+  --primary-light: #E8F5ED;
+  --primary-15: rgba(26,127,75,0.12);
+  --canvas: #ffffff;
+  --canvas-parchment: #f5f5f7;
+  --surface-tile-1: #111312;
+  --surface-tile-2: #1c1f1d;
+  --ink: #1d1d1f;
+  --ink-on-dark: #ffffff;
+  --ink-muted: #6e6e73;
+  --ink-muted-48: #86868b;
+  --hairline: #d2d2d7;
+  --divider-soft: #e8e8ed;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+  --shadow-product: rgba(0,0,0,0.12) 0 8px 40px;
+  --nav-height: 52px;
+  /* ── Refined motion curves ── */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);     /* strong, silky deceleration */
+  --ease-spring:   cubic-bezier(0.34, 1.4, 0.5, 1);    /* gentle overshoot */
+  --ease-lift:     cubic-bezier(0.22, 1, 0.36, 1);     /* hover lift */
+}
+body.dark-mode {
+  --canvas: #0a0a0a;
+  --canvas-parchment: #141416;
+  --ink: #f5f5f7;
+  --ink-muted: #a1a1a6;
+  --ink-muted-48: #6e6e73;
+  --hairline: #38383a;
+  --divider-soft: #2c2c2e;
+  --primary-light: rgba(26,127,75,0.18);
+  --shadow-product: rgba(0,0,0,0.5) 0 8px 40px;
+}
+#root { min-height: 100vh; }
+input, select, textarea, button { font-family: inherit; font-size: inherit; }
+a { color: var(--primary); text-decoration: none; }
+::selection { background: var(--primary-15); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* ── Scroll-reveal system ── base = hidden, .in flips it on ── */
+.rv {
+  opacity: 0;
+  transform: translateY(26px) scale(0.985);
+  filter: blur(6px);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft),
+    filter 0.9s var(--ease-out-soft);
+  transition-delay: var(--rv-delay, 0s);
+  will-change: opacity, transform;
+}
+.rv.in { opacity: 1; transform: none; filter: blur(0); }
+/* Fail-safe: a JS timer adds .done after the entrance window so content is
+   never stranded on a frozen transition frame (background tab / capture). */
+.rv.done { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+
+/* ── Buttery hover lift for cards ── */
+.hov, .hov-d {
+  transition: transform 0.5s var(--ease-lift), box-shadow 0.5s var(--ease-lift), border-color 0.5s var(--ease-lift);
+  will-change: transform;
+}
+.hov:hover { transform: translateY(-5px); box-shadow: 0 18px 44px rgba(0,0,0,0.16); border-color: var(--hairline); }
+.hov-d:hover { transform: translateY(-5px); box-shadow: 0 18px 46px rgba(0,0,0,0.45); border-color: rgba(61,220,110,0.34); }
+
+/* ── Nav links ── */
+.nav-link { transition: color 0.25s ease; }
+.nav-link:hover { color: var(--ink) !important; }
+
+/* ── CTA sheen: a light streak sweeps across primary buttons on hover ── */
+.sheen { position: relative; overflow: hidden; isolation: isolate; }
+.sheen::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; z-index: 1;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.45), transparent);
+  transform: skewX(-18deg); pointer-events: none; opacity: 0;
+}
+.sheen:hover::after { animation: sheenSweep 0.85s var(--ease-out-soft); }
+.sheen:hover { box-shadow: 0 14px 32px -8px var(--primary-15), 0 6px 16px rgba(0,0,0,0.14); }
+@keyframes sheenSweep { 0% { left: -60%; opacity: 0; } 12% { opacity: 1; } 100% { left: 130%; opacity: 0; } }
+
+/* ── Top scroll-progress bar ── */
+#scroll-progress {
+  position: fixed; top: 0; left: 0; height: 2.5px; width: 100%; z-index: 200;
+  transform-origin: 0 50%; transform: scaleX(0);
+  background: var(--primary);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .rv { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+  .sheen::after { display: none; }
+}
+/* ── Glassmorphism mode (toggled via Tweaks → body.glassy) ── */
+/* Frosted panels on light surfaces */
+body.glassy .glass {
+  background: color-mix(in srgb, var(--canvas) 52%, transparent) !important;
+  backdrop-filter: saturate(185%) blur(18px);
+  -webkit-backdrop-filter: saturate(185%) blur(18px);
+  border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent) !important;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.55) !important;
+}
+/* Frosted panels on dark surfaces */
+body.glassy .glass-dark {
+  background: rgba(255,255,255,0.055) !important;
+  backdrop-filter: saturate(170%) blur(18px);
+  -webkit-backdrop-filter: saturate(170%) blur(18px);
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}
+/* Accent glow removed — frosted panels sit on flat surfaces */
+body.glassy .glass-sec { position: relative; isolation: isolate; }
+body.glassy .glass-sec > * { position: relative; z-index: 1; }
+/* Nav becomes permanently frosted in glass mode */
+body.glassy .glass-nav {
+  background: color-mix(in srgb, var(--canvas) 60%, transparent) !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 8%, transparent) !important;
+}
+/* Pro pricing card keeps a subtle neutral tint while frosted */
+body.glassy .glass-pro {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+}
+/* Liquid-glass "add row" button glow on hover (macOS window mock) */
+.gg-add:hover {
+  background: color-mix(in srgb, var(--primary) 14%, transparent) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent),
+              0 6px 18px -5px color-mix(in srgb, var(--primary) 45%, transparent) !important;
+}
+/* Liquid-glass circular toolbar buttons (macOS window mock) */
+.gg-tool { transition: background .15s ease, color .15s ease, transform .12s ease, box-shadow .15s ease; }
+.gg-tool:hover {
+  background: color-mix(in srgb, var(--canvas) 70%, transparent) !important;
+  color: var(--ink) !important;
+}
+.gg-tool:active { transform: scale(0.92); }
+/* Custom scrollbar — matches design tokens, dark-mode aware */
+* { scrollbar-width: thin; scrollbar-color: var(--hairline) transparent; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-muted-48); background-clip: content-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+</style>
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#1A7F4B",
+  "darkMode": false,
+  "fontFamily": "system",
+  "glassmorphism": true,
+  "platform": "windows"
+}/*EDITMODE-END*/;
+</script>
+<link id="gfont-Source-Sans-3" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&amp;display=swap">
+</head>
+<body style="font-family: &quot;Source Sans 3&quot;">
+<div id="root"></div>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="ledger-ui.jsx"></script>
+<script type="text/babel" src="invoicer-motion.jsx"></script>
+<script type="text/babel" src="invoicer-promo.jsx"></script>
+<script type="text/babel" src="invoicer-sections.jsx"></script>
+</body>
+</html>
