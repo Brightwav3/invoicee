@@ -141,72 +141,184 @@ function HowItWorks({ onDownload }) {
 
 /* ─── Pricing ─── */
 function Pricing({ onDownload }) {
-  // Full feature matrix — every plan shows ALL features; only the
-  // tick/cross differs so the user can compare at a glance.
-  const features = [
-    { label: 'Desktop i webová verze', free: true, pro: true },
-    { label: 'Neomezené faktury', free: true, pro: true },
-    { label: 'PDF export + QR platba', free: true, pro: true },
-    { label: 'IČO, DIČ, režimy DPH', free: true, pro: true },
-    { label: 'Lokální historie faktur', free: true, pro: true },
-    { label: 'Bez vodoznaku v PDF', free: false, pro: true },
-    { label: 'Databáze klientů (auto-fill)', free: false, pro: true },
-    { label: 'Synchronizace mezi zařízeními', free: false, pro: true },
-    { label: 'Export do CSV', free: false, pro: true },
-    { label: 'Přednostní podpora', free: false, pro: true },
+  const [annual, setAnnual] = useS2(false);
+
+  const monthlyPrice = 149;
+  const annualPrice  = 119; // per month, billed annually
+  const displayPrice = annual ? annualPrice : monthlyPrice;
+
+  const allFeatures = [
+    { label: 'Desktop i webová verze',          free: true,  pro: true  },
+    { label: 'Neomezené faktury',                free: true,  pro: true  },
+    { label: 'PDF export + QR platba',           free: true,  pro: true  },
+    { label: 'IČO, DIČ, režimy DPH',            free: true,  pro: true  },
+    { label: 'Lokální historie faktur',          free: true,  pro: true  },
+    { label: 'Bez vodoznaku v PDF',              free: false, pro: true  },
+    { label: 'Databáze klientů (auto-fill)',     free: false, pro: true  },
+    { label: 'Synchronizace mezi zařízeními',    free: false, pro: true  },
+    { label: 'Export do CSV',                    free: false, pro: true  },
+    { label: 'Přednostní podpora',               free: false, pro: true  },
   ];
-  const li = (f, included) => (
-    <li key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '8px 0', fontSize: 15.5, color: included ? 'rgba(255,255,255,0.86)' : 'rgba(255,255,255,0.38)', letterSpacing: '-0.2px' }}>
-      <span style={{ flexShrink: 0, display: 'flex', width: 16 }}>
-        {included ? Icons.check(16, 'var(--primary-on-dark)') : Icons.cross(15, 'rgba(255,255,255,0.32)')}
-      </span>
-      <span style={{ textDecoration: included ? 'none' : 'none' }}>{f.label}</span>
+
+  /* SF-style check circle */
+  const CheckCircle = ({ on, dark }) => on ? (
+    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="8.5" cy="8.5" r="8.5" fill={dark ? 'rgba(61,220,110,0.18)' : 'rgba(26,127,75,0.12)'} />
+      <path d="M5 8.6L7.2 11L12 6" stroke={dark ? 'var(--primary-on-dark)' : 'var(--primary)'} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ) : (
+    <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style={{ flexShrink: 0 }}>
+      <circle cx="8.5" cy="8.5" r="8.25" stroke={dark ? 'rgba(255,255,255,0.16)' : 'var(--divider-soft)'} strokeWidth="1" />
+      <path d="M6 6l5 5M11 6l-5 5" stroke={dark ? 'rgba(255,255,255,0.22)' : 'var(--hairline)'} strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+
+  const freeRow = (f) => (
+    <li key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', fontSize: 14.5, color: f.free ? 'var(--ink)' : 'var(--ink-muted-48)', letterSpacing: '-0.2px' }}>
+      <CheckCircle on={f.free} dark={false} />
+      <span>{f.label}</span>
     </li>
   );
+
+  const proRow = (f) => (
+    <li key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', fontSize: 14.5, color: f.pro ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.28)', letterSpacing: '-0.2px' }}>
+      <CheckCircle on={f.pro} dark={true} />
+      <span>{f.label}</span>
+    </li>
+  );
+
   return (
-    <section id="pricing" className="glass-sec" style={{ background: 'var(--surface-tile-1)', color: 'var(--ink-on-dark)', padding: '108px 28px' }}>
-      <div style={{ maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
+    <section id="pricing" style={{ background: 'var(--canvas)', padding: '108px 28px' }}>
+      <div style={{ maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
+
+        {/* ── Header ── */}
         <Reveal>
-          <h2 style={{ fontSize: 'clamp(30px, 4vw, 44px)', fontWeight: 600, lineHeight: 1.08, letterSpacing: '-0.6px', marginBottom: 14 }}>
+          <h2 style={{
+            fontSize: 'clamp(32px, 4.5vw, 52px)',
+            fontWeight: 700, lineHeight: 1.05, letterSpacing: '-1px',
+            color: 'var(--ink)', marginBottom: 14,
+          }}>
             Jednoduché ceny.
           </h2>
-          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.55)', marginBottom: 52, letterSpacing: '-0.2px' }}>
+          <p style={{ fontSize: 19, color: 'var(--ink-muted)', letterSpacing: '-0.3px', marginBottom: 40, lineHeight: 1.45 }}>
             Začněte zdarma. Na Pro přejděte, až budete potřebovat&nbsp;víc.
           </p>
+
+          {/* ── macOS segmented billing toggle ── */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginBottom: 56 }}>
+            <div style={{
+              display: 'inline-flex', padding: 3, gap: 0,
+              background: 'rgba(0,0,0,0.065)', borderRadius: 11,
+            }}>
+              {[{ label: 'Měsíčně', value: false }, { label: 'Ročně', value: true }].map(opt => {
+                const active = annual === opt.value;
+                return (
+                  <button key={opt.label} onClick={() => setAnnual(opt.value)} style={{
+                    padding: '8px 22px', borderRadius: 8, border: 'none',
+                    background: active ? 'white' : 'transparent',
+                    color: active ? 'var(--ink)' : 'var(--ink-muted)',
+                    fontSize: 14.5, fontWeight: active ? 600 : 400,
+                    cursor: 'pointer', letterSpacing: '-0.2px',
+                    transition: 'background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease',
+                    boxShadow: active ? '0 1px 4px rgba(0,0,0,0.13), 0 0 0 0.5px rgba(0,0,0,0.07)' : 'none',
+                  }}>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+            <span style={{
+              fontSize: 12, fontWeight: 700, padding: '4px 11px', borderRadius: 999,
+              background: annual ? 'var(--primary-light)' : 'transparent',
+              color: annual ? 'var(--primary)' : 'transparent',
+              letterSpacing: '0.1px',
+              transition: 'background 0.22s ease, color 0.22s ease',
+              pointerEvents: 'none',
+            }}>Ušetříte 20 %</span>
+          </div>
         </Reveal>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 22, textAlign: 'left' }}>
+
+        {/* ── Cards ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: 16, textAlign: 'left' }}>
+
           {/* Free */}
-          <Reveal delay={0.14} style={{ display: 'flex' }}>
-            <div className="glass-dark hov-d" style={{ padding: 34, borderRadius: 'var(--radius-lg)', background: 'var(--surface-tile-2)', border: '1px solid rgba(255,255,255,0.06)', width: '100%' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Free</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginBottom: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 600, letterSpacing: '-1.4px' }}>0 Kč</span>
+          <Reveal delay={0.1} style={{ display: 'flex' }}>
+            <div style={{
+              flex: 1, borderRadius: 22, padding: '34px 30px',
+              background: 'var(--canvas-parchment)',
+              border: '1px solid var(--divider-soft)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.055), 0 1px 3px rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column',
+              transition: 'transform 0.45s var(--ease-lift), box-shadow 0.45s var(--ease-lift)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 36px rgba(0,0,0,0.10), 0 3px 8px rgba(0,0,0,0.06)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 2px 16px rgba(0,0,0,0.055), 0 1px 3px rgba(0,0,0,0.04)'; }}>
+
+              <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'var(--ink-muted)', marginBottom: 20 }}>Free</div>
+
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 5 }}>
+                <span style={{ fontSize: 58, fontWeight: 700, letterSpacing: '-2.5px', color: 'var(--ink)', lineHeight: 1 }}>0</span>
+                <span style={{ fontSize: 22, fontWeight: 600, color: 'var(--ink-muted)', letterSpacing: '-0.3px' }}> Kč</span>
               </div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 26 }}>navždy zdarma</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px' }}>{features.map(f => li(f, f.free))}</ul>
-              <LedgerButton variant="secondary" onClick={onDownload} style={{ width: '100%', borderColor: 'rgba(255,255,255,0.25)', color: '#fff' }}>
+              <div style={{ fontSize: 13.5, color: 'var(--ink-muted)', marginBottom: 28, letterSpacing: '-0.1px' }}>navždy zdarma</div>
+
+              <LedgerButton variant="secondary" onClick={onDownload} style={{ width: '100%', marginBottom: 30 }}>
                 Stáhnout zdarma
               </LedgerButton>
+
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, flex: 1 }}>
+                {allFeatures.map(freeRow)}
+              </ul>
             </div>
           </Reveal>
+
           {/* Pro */}
-          <Reveal delay={0.24} style={{ display: 'flex' }}>
-            <div className="glass-dark glass-pro hov-d" style={{ padding: 34, borderRadius: 'var(--radius-lg)', background: 'var(--surface-tile-2)', border: '1px solid rgba(255,255,255,0.14)', position: 'relative', width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary-on-dark)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Pro</span>
-                <span style={{ fontSize: 11, padding: '2px 9px', borderRadius: 'var(--radius-pill)', background: 'var(--primary-on-dark)', color: '#04210f', fontWeight: 700 }}>Oblíbené</span>
+          <Reveal delay={0.2} style={{ display: 'flex' }}>
+            <div style={{
+              flex: 1, borderRadius: 22, padding: '34px 30px',
+              background: '#141917',
+              border: '1px solid rgba(255,255,255,0.07)',
+              boxShadow: '0 20px 64px rgba(0,0,0,0.26), 0 4px 16px rgba(0,0,0,0.18)',
+              display: 'flex', flexDirection: 'column',
+              color: 'rgba(255,255,255,0.9)',
+              position: 'relative', overflow: 'hidden',
+              transition: 'transform 0.45s var(--ease-lift), box-shadow 0.45s var(--ease-lift)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 28px 72px rgba(0,0,0,0.34), 0 6px 20px rgba(0,0,0,0.22)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 20px 64px rgba(0,0,0,0.26), 0 4px 16px rgba(0,0,0,0.18)'; }}>
+
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.9px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.48)' }}>Pro</div>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, padding: '3px 10px',
+                  borderRadius: 999, background: 'var(--primary-on-dark)',
+                  color: '#04210f', letterSpacing: '0.2px',
+                }}>Oblíbené</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginBottom: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 600, letterSpacing: '-1.4px' }}>149 Kč</span>
-                <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)' }}>/měs.</span>
+
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 5 }}>
+                <span style={{ fontSize: 58, fontWeight: 700, letterSpacing: '-2.5px', lineHeight: 1 }}>{displayPrice}</span>
+                <span style={{ fontSize: 22, fontWeight: 600, color: 'rgba(255,255,255,0.4)', letterSpacing: '-0.3px' }}> Kč</span>
+                <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.36)', letterSpacing: '-0.2px' }}> /měs.</span>
               </div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 26 }}>vyžaduje účet · zrušíte kdykoliv</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px' }}>{features.map(f => li(f, f.pro))}</ul>
-              <LedgerButton variant="primary" className="sheen" onClick={onDownload} style={{ width: '100%', transition: 'box-shadow 0.5s var(--ease-lift), transform 0.2s ease' }}>
+              <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.38)', marginBottom: 28, letterSpacing: '-0.1px', minHeight: 20 }}>
+                {annual ? `Účtováno ${annualPrice * 12} Kč ročně · zrušíte kdykoliv` : 'vyžaduje účet · zrušíte kdykoliv'}
+              </div>
+
+              <LedgerButton variant="primary" className="sheen" onClick={onDownload} style={{
+                width: '100%', marginBottom: 30,
+                transition: 'box-shadow 0.5s var(--ease-lift), transform 0.2s ease',
+              }}>
                 Vyzkoušet Pro 14 dní zdarma
               </LedgerButton>
+
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, flex: 1 }}>
+                {allFeatures.map(proRow)}
+              </ul>
             </div>
           </Reveal>
+
         </div>
       </div>
     </section>
