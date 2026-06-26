@@ -17,7 +17,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Inter', sans-serif;
   font-size: 17px;
   color: var(--ink);
   background: var(--canvas);
@@ -46,12 +46,21 @@ body {
   --radius-lg: 18px;
   --radius-xl: 28px;
   --radius-pill: 9999px;
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-modal: 20px;
   --shadow-product: rgba(0,0,0,0.12) 0 8px 40px;
   --nav-height: 52px;
   /* ── Refined motion curves ── */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);     /* strong, silky deceleration */
-  --ease-spring:   cubic-bezier(0.34, 1.4, 0.5, 1);    /* gentle overshoot */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);  /* gentle overshoot */
   --ease-lift:     cubic-bezier(0.22, 1, 0.36, 1);     /* hover lift */
+  /* ── Liquid Glass ── */
+  --glass-sm: rgba(255,255,255,0.55);
+  --glass: rgba(255,255,255,0.72);
+  --glass-lg: rgba(255,255,255,0.85);
+  --glass-border: rgba(0,0,0,0.10);
+  --glass-specular: rgba(255,255,255,0.85);
 }
 body.dark-mode {
   --canvas: #0a0a0a;
@@ -63,6 +72,11 @@ body.dark-mode {
   --divider-soft: #2c2c2e;
   --primary-light: rgba(26,127,75,0.18);
   --shadow-product: rgba(0,0,0,0.5) 0 8px 40px;
+  --glass-sm: rgba(28,28,30,0.55);
+  --glass: rgba(28,28,30,0.72);
+  --glass-lg: rgba(28,28,30,0.88);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-specular: rgba(255,255,255,0.10);
 }
 #root { min-height: 100vh; }
 input, select, textarea, button { font-family: inherit; font-size: inherit; }

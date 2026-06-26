@@ -139,23 +139,30 @@ const btnStyles = {
   base: {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
     border: 'none', cursor: 'pointer', fontWeight: 400,
-    transition: 'all 0.2s ease', position: 'relative', textDecoration: 'none',
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+    transition: 'background 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s cubic-bezier(0.22,1,0.36,1), transform 0.15s cubic-bezier(0.34,1.56,0.64,1)',
+    position: 'relative', textDecoration: 'none',
     letterSpacing: '-0.224px',
   },
+  /* Bordered - Prominent (Default) */
   primary: {
     background: 'var(--primary)', color: '#fff',
-    borderRadius: 'var(--radius-pill)', padding: '11px 22px',
+    borderRadius: 'var(--radius-control, 10px)', padding: '11px 22px',
     fontSize: 17, fontWeight: 400,
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.28), 0 1px 2px rgba(0,0,0,0.12)',
   },
+  /* Bordered - Tinted */
   secondary: {
-    background: 'transparent', color: 'var(--primary)',
-    border: '1.5px solid var(--primary)',
-    borderRadius: 'var(--radius-pill)', padding: '10px 21px',
+    background: 'color-mix(in srgb, var(--primary) 12%, transparent)', color: 'var(--primary)',
+    border: '0.5px solid color-mix(in srgb, var(--primary) 28%, transparent)',
+    borderRadius: 'var(--radius-control, 10px)', padding: '10.5px 21.5px',
     fontSize: 17, fontWeight: 400,
+    backdropFilter: 'blur(10px)',
   },
+  /* Borderless */
   ghost: {
     background: 'transparent', color: 'var(--primary)',
-    borderRadius: 'var(--radius-pill)', padding: '11px 22px',
+    borderRadius: 'var(--radius-control, 10px)', padding: '11px 22px',
     fontSize: 17, fontWeight: 400,
   },
   small: {
@@ -193,10 +200,11 @@ function LedgerButton({ variant = 'primary', size, children, style, ...props }) 
 /* ─── Input ─── */
 const inputStyle = {
   width: '100%', padding: '10px 14px',
-  border: '1px solid var(--hairline)', borderRadius: 'var(--radius-sm)',
-  background: 'var(--canvas)', color: 'var(--ink)',
+  border: '0.5px solid var(--hairline)', borderRadius: 'var(--radius-control, 10px)',
+  background: 'color-mix(in srgb, var(--canvas) 92%, transparent)', color: 'var(--ink)',
   fontSize: 15, lineHeight: 1.4, letterSpacing: '-0.2px',
-  transition: 'border-color 0.15s ease',
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif",
+  transition: 'border-color 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s cubic-bezier(0.22,1,0.36,1)',
   outline: 'none',
 };
 const labelStyle = {
@@ -313,10 +321,11 @@ function Modal({ open, onClose, children, title, width = 480 }) {
       animation: 'fadeIn 0.2s ease',
     }} onClick={onClose}>
       <div style={{
-        background: 'var(--canvas)', borderRadius: 'var(--radius-lg)',
-        padding: 32, width, maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto',
-        boxShadow: '0 24px 80px rgba(0,0,0,0.2)',
-        animation: 'scaleIn 0.25s ease',
+        background: 'var(--glass-lg, var(--canvas))', borderRadius: 'var(--radius-modal, 20px)',
+        backdropFilter: 'blur(30px) saturate(200%)', WebkitBackdropFilter: 'blur(30px) saturate(200%)',
+        padding: 20, width, maxWidth: '92vw', maxHeight: '90vh', overflowY: 'auto',
+        boxShadow: 'inset 0 1px 0 var(--glass-specular, rgba(255,255,255,0.9)), 0 22px 70px rgba(0,0,0,0.22), 0 0 0 0.5px var(--glass-border, rgba(0,0,0,0.15))',
+        animation: 'scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1)',
       }} onClick={e => e.stopPropagation()}>
         {title && (
           <h2 style={{

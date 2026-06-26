@@ -102,11 +102,11 @@ function PromoNav({ onDownload, platform }) {
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
       height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 28px',
-      background: scrolled ? 'color-mix(in srgb, var(--canvas) 82%, transparent)' : 'transparent',
-      backdropFilter: scrolled ? 'saturate(180%) blur(20px)' : 'none',
-      WebkitBackdropFilter: scrolled ? 'saturate(180%) blur(20px)' : 'none',
-      borderBottom: scrolled ? '1px solid var(--divider-soft)' : '1px solid transparent',
-      transition: 'all 0.3s ease'
+      background: scrolled ? 'var(--glass, var(--canvas))' : 'transparent',
+      backdropFilter: scrolled ? 'saturate(200%) blur(20px)' : 'none',
+      WebkitBackdropFilter: scrolled ? 'saturate(200%) blur(20px)' : 'none',
+      boxShadow: scrolled ? 'inset 0 -1px 0 var(--glass-border, var(--divider-soft)), inset 0 1px 0 var(--glass-specular, transparent)' : 'none',
+      transition: 'all 0.4s cubic-bezier(0.22,1,0.36,1)'
     }}>
       <Brand size={26} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
